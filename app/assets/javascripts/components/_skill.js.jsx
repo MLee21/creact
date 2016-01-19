@@ -2,6 +2,7 @@ var Skill = React.createClass({
   getInitialState() {
     return { editable: false }
   },
+
   onUpdate() {
     if (this.state.editable) {
 
@@ -15,21 +16,31 @@ var Skill = React.createClass({
     }
     this.setState({ editable: !this.state.editable })
   },
-  handleLevelChange(action) {
-    let levels = ['bad', 'halfbad', 'fantastic'];
-    let name = this.props.skill.name;
-    let details = this.props.skill.details;
-    let level = this.props.skill.level;
-    let index = levels.indexOf(level);
 
-    if (action === 'up' && index < 2) {
-      let newLevel = levels[index + 1];
-      this.props.handleUpdate({id: this.props.skill.id, name: name, details: details, level: newLevel })
-    } else if (action === 'down' && index > 0) {
-      let newLevel = levels[index - 1];
-      this.props.handleUpdate({id: this.props.skill.id, name: name, details: details, level: newLevel })
+  onUpdateLevel(action) {
+    if (this.levelCanBeChanged(action)) {
+      let level = this.getNewLevel(action)
+      let skill = {id: this.props.skill.id, level: level }
+
+      this.props.handleUpdate(skill);
     }
   },
+
+  levelCanBeChanged(action) {
+    let levels = ['bad', 'halfbad', 'fantastic'];
+    let index = levels.indexOf(this.props.skill.level);
+
+    return action === 'up' && index < 2 || action === 'down' && index > 0;
+  },
+
+  getNewLevel(action) {
+    let levels = ['bad', 'halfbad', 'fantastic'];
+    let level = levels.indexOf(this.props.skill.level);
+    let change = action === 'up' ? 1 : -1;
+
+    return action ? levels[level + change] : this.props.skill.level;
+  },
+
 render() {
   var name = this.state.editable ? <input type='text' ref='name' defaultValue={this.props.skill.name} />
                                  : <h3>{this.props.skill.name}</h3>
@@ -44,11 +55,11 @@ render() {
         
         {details}
 
-        <button type="button" className="btn btn-default btn-sm" onClick={ this.handleLevelChange.bind(this, 'down')}>
+        <button type="button" className="btn btn-default btn-sm" onClick={ this.onUpdateLevel.bind(this, 'down')}>
           <span className="glyphicon glyphicon-triangle-bottom"></span>
         </button>
 
-        <button type="button" className="btn btn-default btn-sm" onClick={ this.handleLevelChange.bind(this, 'up')}>
+        <button type="button" className="btn btn-default btn-sm" onClick={ this.onUpdateLevel.bind(this, 'up')}>
           <span className="glyphicon glyphicon-triangle-top"></span>
         </button>
 
